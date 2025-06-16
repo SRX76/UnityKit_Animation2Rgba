@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 using UnityEditor;
+using UnityEditor.Animations;
 
 namespace SrxUnity.Recorder
 {
@@ -39,7 +40,7 @@ namespace SrxUnity.Recorder
             List<AnimationClip> res = new List<AnimationClip>(files.Count);
             foreach (var file in files)
             {
-                var clip = LoadAssetAtPath(file);
+                var clip = LoadAnimationClip(file);
                 if (clip != null)
                 {
                     res.Add(clip);
@@ -48,7 +49,7 @@ namespace SrxUnity.Recorder
             return res;
         }
 
-        public static AnimationClip LoadAssetAtPath(string file)
+        public static AnimationClip LoadAnimationClip(string file)
         {
             AnimationClip clip = null;
 #if UNITY_EDITOR
@@ -56,6 +57,24 @@ namespace SrxUnity.Recorder
 
 #endif
             return clip;
+        }
+
+        public static RuntimeAnimatorController LoadAnimatorController(string file)
+        {
+            return LoadAssetAtPath<AnimatorController>(file);
+        }
+
+        public static T LoadAssetAtPath<T>(string file) where T : Object
+        {
+            T asset = null;
+#if UNITY_EDITOR
+            asset = AssetDatabase.LoadAssetAtPath<T>(file);
+#endif
+            if (asset == null)
+            {
+                Debug.LogError($"加载资源失败：类型{typeof(T).Name},path:{file}");
+            }
+            return asset;
         }
     }
 }
