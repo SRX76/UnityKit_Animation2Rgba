@@ -4,6 +4,7 @@ using UnityEngine;
 
 using UnityEditor;
 using UnityEditor.Animations;
+using System.IO;
 
 namespace SrxUnity.Recorder
 {
@@ -75,6 +76,21 @@ namespace SrxUnity.Recorder
                 Debug.LogError($"加载资源失败：类型{typeof(T).Name},path:{file}");
             }
             return asset;
+        }
+
+        [MenuItem("Tools/格式转换为png")]
+        static void ConvertToPng()
+        {
+            //string file = "Recordings/Image Sequence_007_0000.png";
+            string file = "_SavePath.bin";
+            var bytes = File.ReadAllBytes(file);
+            Texture2D tex = new Texture2D(1920, 1080, TextureFormat.RGBA32, false);
+            tex.LoadRawTextureData(bytes);
+            tex.Apply();
+            var bytesSave = tex.EncodeToPNG();
+            File.WriteAllBytes("_tex.png", bytesSave);
+            UnityEngine.Object.DestroyImmediate(tex);
+            tex = null;
         }
     }
 }
