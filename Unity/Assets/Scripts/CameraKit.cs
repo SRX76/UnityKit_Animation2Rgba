@@ -1,13 +1,20 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Data.SqlTypes;
 using System.IO;
+using System.Threading;
+using Unity.Collections;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 namespace SrxUnity.Recorder
 {
     public class CameraKit
     {
+        static Stack<NativeArray<byte>> stack = new Stack<NativeArray<byte>>();
+
+
         public static void SaveCamTexture(Camera cam, string filePath, Action actSuccess = null, Action actFailed = null)
         {
             if (cam == null)
@@ -35,5 +42,42 @@ namespace SrxUnity.Recorder
             actSuccess?.Invoke();
         }
 
+        public static void SaveCamTexture2(Camera cam, string filePath)
+        {
+            //SystemInfo.supportsAsyncGPUReadback
+            cam.Render();
+            var rt = cam.targetTexture;
+            int Width = rt.width;
+            int Height = rt.height;
+
+
+            var buff = new NativeArray<byte>(Width * Height * 4, Allocator.Persistent);
+            var format = rt.graphicsFormat;
+            var req = AsyncGPUReadback.RequestIntoNativeArray(ref buff, rt, 0, format, (_) =>
+            {
+                if (_.hasError)
+                {
+                    Debug.LogError("AsyncGPUReadback error");
+                    buff.Dispose();
+                    return;
+                }
+                var bytesSRC = _.GetData<byte>().ToArray();
+                buff.Dispose();
+                SaveWithThread(() =>
+                    {
+                        var bytes = ImageConversion.EncodeArrayToPNG(bytesSRC, format, (uint)Width, (uint)Height);
+                        File.WriteAllBytes(filePath, bytes);
+                    });
+            });
+        }
+
+
+
+
+        static void SaveWithThread(Action act)
+        {
+            var subThread = new Thread((_) => act?.Invoke());
+            subThread.Start();
+        }
     }
 }
