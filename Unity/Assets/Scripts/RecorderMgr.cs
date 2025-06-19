@@ -32,7 +32,7 @@ public class RecorderMgr : MonoBehaviour
 
     public void Awake()
     {
-        Application.targetFrameRate = 60;
+        Application.targetFrameRate = 0;
         CollectionAsset();
 
         modelRoot = transform.Find("Model");
@@ -155,7 +155,7 @@ public class RecorderMgr : MonoBehaviour
         clipFiles = AssetKit.FindFile_AnimationClip(animationRootFolder);
         clipIndex = 0;
 
-        string pfbRootFolder = "Assets/Res/Prefab";
+        string pfbRootFolder = "Assets/Res/Fbx/Model";
         goPfbFiles = AssetKit.FindAssets<GameObject>(pfbRootFolder);
     }
 
