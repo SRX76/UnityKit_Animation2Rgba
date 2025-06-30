@@ -21,6 +21,7 @@ public class ModelImporterProcess : AssetPostprocessor
         }
         if (importer.assetPath.StartsWith("Assets/Res/Fbx/Model"))
         {
+            SetPreModelImporter_0(importer);
             SetPreModelImporter_1(importer);
             return;
         }
@@ -50,6 +51,7 @@ public class ModelImporterProcess : AssetPostprocessor
         importer.importNormals = ModelImporterNormals.Import;
         importer.importTangents = ModelImporterTangents.CalculateMikk;
     }
+
     void SetPreModelImporter_1(ModelImporter importer)
     {
         importer.materialImportMode = ModelImporterMaterialImportMode.ImportViaMaterialDescription;
