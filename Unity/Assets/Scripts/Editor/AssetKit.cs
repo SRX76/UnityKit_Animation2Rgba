@@ -5,6 +5,7 @@ using UnityEngine;
 using UnityEditor;
 using UnityEditor.Animations;
 using System.IO;
+using UnityEngine.Experimental.Rendering;
 
 namespace SrxUnity.Recorder
 {
@@ -62,7 +63,11 @@ namespace SrxUnity.Recorder
 
         public static RuntimeAnimatorController LoadAnimatorController(string file)
         {
-            return LoadAssetAtPath<AnimatorController>(file);
+            RuntimeAnimatorController res = null;
+#if UNITY_EDITOR
+            res = LoadAssetAtPath<AnimatorController>(file);
+#endif
+            return res;
         }
 
         public static T LoadAssetAtPath<T>(string file) where T : Object
@@ -78,19 +83,22 @@ namespace SrxUnity.Recorder
             return asset;
         }
 
+#if UNITY_EDITOR
         [MenuItem("Tools/格式转换为png")]
+#endif
         static void ConvertToPng()
         {
-            //string file = "Recordings/Image Sequence_007_0000.png";
-            string file = "_SavePath.bin";
+            //string file = "_SavePath.bin";
+            string file = "_tex1.png";
             var bytes = File.ReadAllBytes(file);
+
             Texture2D tex = new Texture2D(1920, 1080, TextureFormat.RGBA32, false);
-            tex.LoadRawTextureData(bytes);
-            tex.Apply();
-            var bytesSave = tex.EncodeToPNG();
-            File.WriteAllBytes("_tex.png", bytesSave);
-            UnityEngine.Object.DestroyImmediate(tex);
-            tex = null;
+            tex.LoadImage(bytes);
+            var nativeArr = tex.GetRawTextureData<byte>();
+            ImageConversion.EncodeNativeArrayToPNG(nativeArr, tex.graphicsFormat, (uint)tex.width, (uint)tex.height);
+            var bytesSave = nativeArr.ToArray();
+            var foramt = GraphicsFormatUtility.GetGraphicsFormat(TextureFormat.ARGB32, true);
+            PngSaveKit.SaveToPng(bytesSave, "_tex0.png", foramt, 1920, 1080);
         }
     }
 }
