@@ -54,6 +54,11 @@ public class RecorderMgr : MonoBehaviour
             clipIndex = -1;
             while (LoadNextAnimationClip())
             {
+                string folder = $"{saveRootFolder}/{modelName}_{clipName}";
+                if (!Directory.Exists(folder))
+                {
+                    Directory.CreateDirectory(folder);
+                }
                 OverrideController();
                 yield return null;
                 texId = 0;
@@ -64,7 +69,7 @@ public class RecorderMgr : MonoBehaviour
                     texId++;
                     animator.Update(dtTime);
                     yield return new WaitForEndOfFrame();
-                    string savePath = $"{saveRootFolder}/{modelName}/{clipName}_{texId}.png";
+                    string savePath = $"{saveRootFolder}/{folder}/{texId}.png";
                     Recorder(savePath, () =>
                     {
                         Debug.Log($"保存成功:{savePath}");
