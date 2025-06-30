@@ -54,7 +54,7 @@ public class RecorderMgr : MonoBehaviour
             clipIndex = -1;
             while (LoadNextAnimationClip())
             {
-                string folder = $"{saveRootFolder}/{modelName}_{clipName}";
+                string folder = $"{saveRootFolder}/{modelName}*{clipName}";
                 if (!Directory.Exists(folder))
                 {
                     Directory.CreateDirectory(folder);
